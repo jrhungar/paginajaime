@@ -40,6 +40,37 @@
     color: inherit; opacity: .75;
   }
   .placeholder p { margin: 0; line-height: 1.55; }
+  .seccion { margin-bottom: 28px; }
+  .seccion h2 {
+    font-size: 18px; margin: 0 0 12px;
+  }
+  .seccion ul {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    .seccion li { background: #1b232e !important; border-color: #2b3644 !important; }
+  }
+  .seccion li {
+    background: #fff; border: 1px solid #dde3ea; border-radius: 12px;
+    padding: 14px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+  }
+  .seccion .etiqueta { line-height: 1.4; }
+  .seccion .votos {
+    font-size: 13px; opacity: .7; white-space: nowrap;
+  }
+  .seccion .acciones {
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  }
+  .seccion button {
+    border: 1px solid #c3ccd6; background: #eef2f6; color: inherit;
+    border-radius: 8px; padding: 8px 14px;
+    font-size: 14px; cursor: pointer;
+  }
+  .seccion button:active { transform: translateY(1px); }
+  .seccion .vacio { opacity: .7; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -49,9 +80,111 @@
        gustaría que tuviera, qué cambiarías o cualquier idea que se te ocurra.</p>
   </header>
   <main>
+    <section class="seccion">
+      <h2>Propuestas de fecha para la cena</h2>
+      <ul id="lista-fechas"></ul>
+    </section>
+    <section class="seccion">
+      <h2>Propuestas de lugares para ir a cenar</h2>
+      <ul id="lista-lugares"></ul>
+    </section>
     <div class="placeholder">
       <p>Aquí va a ir el formulario para dejar tu sugerencia.</p>
     </div>
   </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://mguzayplgdoxubfatwsy.supabase.co",
+      "sb_publishable_04ZLX99calb5dgi5Ekkxag_WE9K5kp9"
+    );
+
+    function crearFila(texto, votos, onVotar) {
+      const li = document.createElement("li");
+
+      const etiqueta = document.createElement("span");
+      etiqueta.className = "etiqueta";
+      etiqueta.textContent = texto;
+
+      const acciones = document.createElement("div");
+      acciones.className = "acciones";
+
+      const contador = document.createElement("span");
+      contador.className = "votos";
+      contador.textContent = votos === 1 ? "1 voto" : votos + " votos";
+
+      const boton = document.createElement("button");
+      boton.type = "button";
+      boton.textContent = "Votar";
+      boton.addEventListener("click", async () => {
+        boton.disabled = true;
+        try {
+          await onVotar();
+          votos += 1;
+          contador.textContent = votos === 1 ? "1 voto" : votos + " votos";
+        } finally {
+          boton.disabled = false;
+        }
+      });
+
+      acciones.appendChild(contador);
+      acciones.appendChild(boton);
+      li.appendChild(etiqueta);
+      li.appendChild(acciones);
+      return li;
+    }
+
+    async function cargarFechas() {
+      const lista = document.getElementById("lista-fechas");
+      const { data, error } = await supabase
+        .from("fechas_propuestas")
+        .select("id, etiqueta, votos")
+        .order("votos", { ascending: false });
+
+      if (error || !data || data.length === 0) {
+        const li = document.createElement("li");
+        li.className = "vacio";
+        li.textContent = "Todavía no hay propuestas de fecha.";
+        lista.appendChild(li);
+        return;
+      }
+
+      data.forEach((fila) => {
+        lista.appendChild(
+          crearFila(fila.etiqueta, fila.votos, async () => {
+            await supabase.rpc("votar_fecha", { fecha_id: fila.id });
+          })
+        );
+      });
+    }
+
+    async function cargarLugares() {
+      const lista = document.getElementById("lista-lugares");
+      const { data, error } = await supabase
+        .from("lugares_propuestas")
+        .select("id, nombre, votos")
+        .order("votos", { ascending: false });
+
+      if (error || !data || data.length === 0) {
+        const li = document.createElement("li");
+        li.className = "vacio";
+        li.textContent = "Todavía no hay propuestas de lugares.";
+        lista.appendChild(li);
+        return;
+      }
+
+      data.forEach((fila) => {
+        lista.appendChild(
+          crearFila(fila.nombre, fila.votos, async () => {
+            await supabase.rpc("votar_lugar", { lugar_id: fila.id });
+          })
+        );
+      });
+    }
+
+    cargarFechas();
+    cargarLugares();
+  </script>
 </body>
 </html>
