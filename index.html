@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Buzón de sugerencias — Posada de fin de año</title>
+<title>Buzón de sugerencias MRII — Posada de fin de año</title>
 <style>
   :root { color-scheme: light dark; }
   body {
@@ -14,7 +14,6 @@
   @media (prefers-color-scheme: dark) {
     body { background: #121820; color: #e8eef5; }
     header { background: #1b232e !important; border-color: #2b3644 !important; }
-    .placeholder { background: #1b232e !important; border-color: #2b3644 !important; }
   }
   header {
     background: #fff; border-bottom: 1px solid #dde3ea;
@@ -34,16 +33,7 @@
     max-width: 600px; margin: 0 auto;
     padding: 24px 20px 48px;
   }
-  .placeholder {
-    background: #fff; border: 1px dashed #c3ccd6; border-radius: 14px;
-    padding: 40px 24px; text-align: center;
-    color: inherit; opacity: .75;
-  }
-  .placeholder p { margin: 0; line-height: 1.55; }
   .seccion { margin-bottom: 28px; }
-  .seccion h2 {
-    font-size: 18px; margin: 0 0 12px;
-  }
   .seccion ul {
     list-style: none; margin: 0; padding: 0;
     display: flex; flex-direction: column; gap: 10px;
@@ -71,39 +61,56 @@
   }
   .seccion button:active { transform: translateY(1px); }
   .seccion .vacio { opacity: .7; font-size: 14px; }
-  .tabla-fechas {
+  .recuadro {
     background: #fff; border: 1px solid #dde3ea; border-radius: 14px;
     padding: 24px; overflow-x: auto;
   }
   @media (prefers-color-scheme: dark) {
-    .tabla-fechas { background: #1b232e !important; border-color: #2b3644 !important; }
-    .tabla-fechas table th { border-color: #2b3644 !important; }
-    .tabla-fechas table td { border-color: #2b3644 !important; }
+    .recuadro { background: #1b232e !important; border-color: #2b3644 !important; }
+    .recuadro th { border-color: #2b3644 !important; }
+    .recuadro td { border-color: #2b3644 !important; }
+    .recuadro button { border-color: #2b3644 !important; background: #24303e !important; }
+    .recuadro form button[type="submit"] { background: #8a63d2 !important; }
+    .recuadro form button[type="submit"]:hover { background: #9c7ae0 !important; }
   }
-  .tabla-fechas h2 { font-size: 18px; margin: 0 0 12px; }
-  .tabla-fechas table {
+  .recuadro h2 { font-size: 18px; margin: 0 0 12px; }
+  .recuadro h2.segunda { margin-top: 28px; }
+  .recuadro table {
     width: 100%; border-collapse: collapse; font-size: 14px;
   }
-  .tabla-fechas th, .tabla-fechas td {
+  .recuadro th, .recuadro td {
     text-align: left; padding: 10px 8px;
     border-bottom: 1px solid #dde3ea;
   }
-  .tabla-fechas th:last-child, .tabla-fechas td:last-child { text-align: right; }
-  .tabla-fechas form {
+  .recuadro th:last-child, .recuadro td:last-child { text-align: right; }
+  .recuadro button {
+    border: 1px solid #c3ccd6; background: #eef2f6; color: inherit;
+    border-radius: 8px; padding: 8px 14px;
+    font-size: 14px; cursor: pointer;
+  }
+  .recuadro button:active { transform: translateY(1px); }
+  .recuadro form {
     display: flex; gap: 8px; margin-top: 16px;
   }
-  .tabla-fechas input[type="text"] {
+  .recuadro form button[type="submit"] {
+    border: none; background: #6f42c1; color: #fff; font-weight: 600;
+  }
+  .recuadro form button[type="submit"]:hover { background: #5e35a8; }
+  .recuadro input[type="text"] {
     flex: 1; min-width: 0;
     padding: 8px 10px; border: 1px solid #c3ccd6; border-radius: 8px;
     font-size: 14px; background: inherit; color: inherit;
   }
-  .tabla-fechas .vacio { opacity: .7; font-size: 14px; }
-  .tabla-fechas h2.segunda { margin-top: 28px; }
+  .recuadro .vacio { opacity: .7; font-size: 14px; }
+  .recuadro .error {
+    margin: 8px 0 0; font-size: 13px; font-weight: 600;
+  }
+  .recuadro .error[hidden] { display: none; }
 </style>
 </head>
 <body>
   <header>
-    <h1>Buzón de sugerencias — Posada de fin de año</h1>
+    <h1>Buzón de sugerencias MRII — Posada de fin de año</h1>
     <p>Ayúdanos a organizar la posada de este año: cuéntanos qué fecha
        propones y dónde te gustaría que fuera la cena.</p>
   </header>
@@ -114,7 +121,7 @@
     <section class="seccion">
       <ul id="lista-lugares"></ul>
     </section>
-    <div class="tabla-fechas">
+    <div class="recuadro">
       <h2>Propón y vota una fecha</h2>
       <table>
         <thead>
@@ -130,6 +137,7 @@
         <input type="text" id="input-fecha" placeholder="Ej. Viernes 12 de diciembre" maxlength="200" required>
         <button type="submit">Proponer</button>
       </form>
+      <p class="error" id="error-fecha" hidden></p>
 
       <h2 class="segunda">Propón y vota un restaurante</h2>
       <table>
@@ -146,6 +154,7 @@
         <input type="text" id="input-lugar" placeholder="Ej. Trattoria Roma" maxlength="200" required>
         <button type="submit">Proponer</button>
       </form>
+      <p class="error" id="error-lugar" hidden></p>
     </div>
   </main>
 
@@ -156,20 +165,11 @@
       "sb_publishable_04ZLX99calb5dgi5Ekkxag_WE9K5kp9"
     );
 
-    function crearFila(texto, votos, onVotar) {
-      const li = document.createElement("li");
+    function formatoVotos(votos) {
+      return votos === 1 ? "1 voto" : votos + " votos";
+    }
 
-      const etiqueta = document.createElement("span");
-      etiqueta.className = "etiqueta";
-      etiqueta.textContent = texto;
-
-      const acciones = document.createElement("div");
-      acciones.className = "acciones";
-
-      const contador = document.createElement("span");
-      contador.className = "votos";
-      contador.textContent = votos === 1 ? "1 voto" : votos + " votos";
-
+    function crearBotonVotar(onVotar) {
       const boton = document.createElement("button");
       boton.type = "button";
       boton.textContent = "Votar";
@@ -177,66 +177,32 @@
         boton.disabled = true;
         try {
           await onVotar();
-          votos += 1;
-          contador.textContent = votos === 1 ? "1 voto" : votos + " votos";
         } finally {
           boton.disabled = false;
         }
       });
+      return boton;
+    }
 
+    function crearFila(texto, votos, onVotar) {
+      const li = document.createElement("li");
+
+      const etiqueta = document.createElement("span");
+      etiqueta.className = "etiqueta";
+      etiqueta.textContent = texto;
+
+      const contador = document.createElement("span");
+      contador.className = "votos";
+      contador.textContent = formatoVotos(votos);
+
+      const acciones = document.createElement("div");
+      acciones.className = "acciones";
       acciones.appendChild(contador);
-      acciones.appendChild(boton);
+      acciones.appendChild(crearBotonVotar(onVotar));
+
       li.appendChild(etiqueta);
       li.appendChild(acciones);
       return li;
-    }
-
-    async function cargarFechas() {
-      const lista = document.getElementById("lista-fechas");
-      const { data, error } = await supabase
-        .from("fechas_propuestas")
-        .select("id, etiqueta, votos")
-        .order("votos", { ascending: false });
-
-      if (error || !data || data.length === 0) {
-        const li = document.createElement("li");
-        li.className = "vacio";
-        li.textContent = "Todavía no hay propuestas de fecha.";
-        lista.appendChild(li);
-        return;
-      }
-
-      data.forEach((fila) => {
-        lista.appendChild(
-          crearFila(fila.etiqueta, fila.votos, async () => {
-            await supabase.rpc("votar_fecha", { fecha_id: fila.id });
-          })
-        );
-      });
-    }
-
-    async function cargarLugares() {
-      const lista = document.getElementById("lista-lugares");
-      const { data, error } = await supabase
-        .from("lugares_propuestas")
-        .select("id, nombre, votos")
-        .order("votos", { ascending: false });
-
-      if (error || !data || data.length === 0) {
-        const li = document.createElement("li");
-        li.className = "vacio";
-        li.textContent = "Todavía no hay propuestas de lugares.";
-        lista.appendChild(li);
-        return;
-      }
-
-      data.forEach((fila) => {
-        lista.appendChild(
-          crearFila(fila.nombre, fila.votos, async () => {
-            await supabase.rpc("votar_lugar", { lugar_id: fila.id });
-          })
-        );
-      });
     }
 
     function crearFilaTabla(texto, votos, onVotar) {
@@ -249,20 +215,7 @@
       tdVotos.textContent = votos;
 
       const tdBoton = document.createElement("td");
-      const boton = document.createElement("button");
-      boton.type = "button";
-      boton.textContent = "Votar";
-      boton.addEventListener("click", async () => {
-        boton.disabled = true;
-        try {
-          await onVotar();
-          votos += 1;
-          tdVotos.textContent = votos;
-        } finally {
-          boton.disabled = false;
-        }
-      });
-      tdBoton.appendChild(boton);
+      tdBoton.appendChild(crearBotonVotar(onVotar));
 
       tr.appendChild(tdEtiqueta);
       tr.appendChild(tdVotos);
@@ -270,104 +223,108 @@
       return tr;
     }
 
-    async function cargarTablaFechas() {
-      const cuerpo = document.getElementById("tabla-fechas-cuerpo");
-      cuerpo.innerHTML = "";
+    function mostrarVacio(destino, mensaje) {
+      const esTabla = destino.tagName === "TBODY";
+      const item = document.createElement(esTabla ? "tr" : "li");
+      item.className = "vacio";
+      if (esTabla) {
+        const td = document.createElement("td");
+        td.colSpan = 3;
+        td.textContent = mensaje;
+        item.appendChild(td);
+      } else {
+        item.textContent = mensaje;
+      }
+      destino.appendChild(item);
+    }
+
+    async function cargarFechas() {
+      const lista = document.getElementById("lista-fechas");
+      const cuerpoTabla = document.getElementById("tabla-fechas-cuerpo");
+      lista.innerHTML = "";
+      cuerpoTabla.innerHTML = "";
+
       const { data, error } = await supabase
         .from("fechas_propuestas")
         .select("id, etiqueta, votos")
         .order("votos", { ascending: false });
 
       if (error || !data || data.length === 0) {
-        const tr = document.createElement("tr");
-        const td = document.createElement("td");
-        td.colSpan = 3;
-        td.className = "vacio";
-        td.textContent = "Todavía no hay fechas propuestas.";
-        tr.appendChild(td);
-        cuerpo.appendChild(tr);
+        mostrarVacio(lista, "Todavía no hay propuestas de fecha.");
+        mostrarVacio(cuerpoTabla, "Todavía no hay fechas propuestas.");
         return;
       }
 
       data.forEach((fila) => {
-        cuerpo.appendChild(
-          crearFilaTabla(fila.etiqueta, fila.votos, async () => {
-            await supabase.rpc("votar_fecha", { fecha_id: fila.id });
-          })
-        );
+        const onVotar = async () => {
+          await supabase.rpc("votar_fecha", { fecha_id: fila.id });
+          await cargarFechas();
+        };
+        lista.appendChild(crearFila(fila.etiqueta, fila.votos, onVotar));
+        cuerpoTabla.appendChild(crearFilaTabla(fila.etiqueta, fila.votos, onVotar));
       });
     }
 
-    async function cargarTablaLugares() {
-      const cuerpo = document.getElementById("tabla-lugares-cuerpo");
-      cuerpo.innerHTML = "";
+    async function cargarLugares() {
+      const lista = document.getElementById("lista-lugares");
+      const cuerpoTabla = document.getElementById("tabla-lugares-cuerpo");
+      lista.innerHTML = "";
+      cuerpoTabla.innerHTML = "";
+
       const { data, error } = await supabase
         .from("lugares_propuestas")
         .select("id, nombre, votos")
         .order("votos", { ascending: false });
 
       if (error || !data || data.length === 0) {
-        const tr = document.createElement("tr");
-        const td = document.createElement("td");
-        td.colSpan = 3;
-        td.className = "vacio";
-        td.textContent = "Todavía no hay restaurantes propuestos.";
-        tr.appendChild(td);
-        cuerpo.appendChild(tr);
+        mostrarVacio(lista, "Todavía no hay propuestas de lugares.");
+        mostrarVacio(cuerpoTabla, "Todavía no hay restaurantes propuestos.");
         return;
       }
 
       data.forEach((fila) => {
-        cuerpo.appendChild(
-          crearFilaTabla(fila.nombre, fila.votos, async () => {
-            await supabase.rpc("votar_lugar", { lugar_id: fila.id });
-          })
-        );
+        const onVotar = async () => {
+          await supabase.rpc("votar_lugar", { lugar_id: fila.id });
+          await cargarLugares();
+        };
+        lista.appendChild(crearFila(fila.nombre, fila.votos, onVotar));
+        cuerpoTabla.appendChild(crearFilaTabla(fila.nombre, fila.votos, onVotar));
       });
     }
 
-    document.getElementById("form-fecha").addEventListener("submit", async (evento) => {
-      evento.preventDefault();
-      const input = document.getElementById("input-fecha");
-      const etiqueta = input.value.trim();
-      if (!etiqueta) return;
+    function conectarFormularioPropuesta(formId, inputId, errorId, rpc, parametro, recargar) {
+      const form = document.getElementById(formId);
+      const errorEl = document.getElementById(errorId);
 
-      const boton = evento.target.querySelector("button");
-      boton.disabled = true;
-      try {
-        const { error } = await supabase.rpc("agregar_fecha", { etiqueta_nueva: etiqueta });
-        if (!error) {
+      form.addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+        const input = document.getElementById(inputId);
+        const valor = input.value.trim();
+        if (!valor) return;
+
+        errorEl.hidden = true;
+        const boton = form.querySelector("button");
+        boton.disabled = true;
+        try {
+          const { error } = await supabase.rpc(rpc, { [parametro]: valor });
+          if (error) {
+            errorEl.textContent = "No se pudo guardar la propuesta. Intenta de nuevo.";
+            errorEl.hidden = false;
+            return;
+          }
           input.value = "";
-          await cargarTablaFechas();
+          await recargar();
+        } finally {
+          boton.disabled = false;
         }
-      } finally {
-        boton.disabled = false;
-      }
-    });
+      });
+    }
 
-    document.getElementById("form-lugar").addEventListener("submit", async (evento) => {
-      evento.preventDefault();
-      const input = document.getElementById("input-lugar");
-      const nombre = input.value.trim();
-      if (!nombre) return;
-
-      const boton = evento.target.querySelector("button");
-      boton.disabled = true;
-      try {
-        const { error } = await supabase.rpc("agregar_lugar", { nombre_nuevo: nombre });
-        if (!error) {
-          input.value = "";
-          await cargarTablaLugares();
-        }
-      } finally {
-        boton.disabled = false;
-      }
-    });
+    conectarFormularioPropuesta("form-fecha", "input-fecha", "error-fecha", "agregar_fecha", "etiqueta_nueva", cargarFechas);
+    conectarFormularioPropuesta("form-lugar", "input-lugar", "error-lugar", "agregar_lugar", "nombre_nuevo", cargarLugares);
 
     cargarFechas();
     cargarLugares();
-    cargarTablaFechas();
-    cargarTablaLugares();
   </script>
 </body>
 </html>
