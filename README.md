@@ -1,31 +1,18 @@
-# Mi página
+# Buzón de sugerencias — Posada de fin de año (MRII)
 
-Una página pública con un formulario que guarda lo que la gente escribe, y una
-lista que muestra lo guardado.
+Página donde el equipo de MRII propone y vota fecha y restaurante
+para la cena de fin de año.
 
-Construida en la **Sesión 7 del curso Claude for Business**, sin escribir código:
-todo se le pidió a Claude en español.
+**Datos:** vienen de Supabase (tablas `fechas_propuestas` y
+`lugares_propuestas`); nada se escribe a mano en el HTML.
 
-## Cómo está armado
+**`.claude/agents/revisor-antes-de-publicar.md`:** un subagente que
+revisa la página antes de publicar (llaves secretas, colores,
+calidad del código) y solo reporta, nunca arregla nada.
 
-| Pieza | Qué hace |
-|---|---|
-| **GitHub** | Guarda este proyecto y su historial |
-| **Netlify** | Publica lo que hay aquí como página web |
-| **Supabase** | Guarda lo que la gente escribe en el formulario |
+**Para seguirle:**
+1. Pide el cambio a Claude sobre este repositorio.
+2. Revisa la vista previa que Netlify genera en la rama.
+3. Di "haz pull y despliegue" para fusionar a `main` y publicar.
 
-## Cómo se cambia
-
-1. Se abre una sesión de Claude sobre este repositorio.
-2. Se le pide el cambio **en una rama**, no en `main`.
-3. Netlify hace una **vista previa** con su propia liga: ahí se revisa.
-4. Cuando está bien, se fusiona la rama. Eso —y solo eso— publica.
-
-> **Fusionar cuesta.** El plan gratuito de Netlify alcanza para unas veinte
-> publicaciones al mes. Las vistas previas son gratis e ilimitadas: se itera ahí
-> y se fusiona poco.
-
-## Qué NO va en este repositorio
-
-La llave `sb_publishable_` sí puede estar aquí: está hecha para andar a la vista.
-La que empieza con `sb_secret_` o dice `service_role`, **nunca**.
+Las reglas completas están en `CLAUDE.md`.

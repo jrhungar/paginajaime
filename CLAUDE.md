@@ -13,11 +13,18 @@ yo y todo mi equipo.
 
 ## 2. De dónde sale cada cifra
 
-Los datos de esta página viven en una tabla de Supabase llamada `registros`.
-Ninguna cifra ni ningún texto que se muestre se escribe a mano en el HTML: todo
-sale de esa tabla o de lo que la persona escriba en el formulario.
+Los datos de esta página viven en dos tablas de Supabase:
 
-*(En la sesión le agregas las columnas que acabes usando.)*
+- `fechas_propuestas`: `id`, `created_at`, `etiqueta` (el texto de la fecha
+  propuesta), `votos`.
+- `lugares_propuestas`: `id`, `created_at`, `nombre` (el restaurante
+  propuesto), `votos`.
+
+Ninguna cifra ni ningún texto que se muestre se escribe a mano en el HTML:
+todo sale de esas tablas o de lo que la persona proponga en el formulario.
+
+La tabla `registros` (con columnas `nombre` y `mensaje`) sigue en Supabase
+pero ya no la usa la página.
 
 ## 3. Cómo quiero que trabajes aquí
 
