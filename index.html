@@ -3,46 +3,188 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Todavía no hay nada aquí</title>
+<title>Buzón de sugerencias — Posada de fin de año</title>
 <style>
   :root { color-scheme: light dark; }
   body {
     margin: 0; min-height: 100vh;
-    display: grid; place-items: center;
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
     background: #f4f6f8; color: #1a2027;
-    padding: 24px;
   }
   @media (prefers-color-scheme: dark) {
     body { background: #121820; color: #e8eef5; }
-    .caja { background: #1b232e !important; border-color: #2b3644 !important; }
-    code { background: #253040 !important; }
+    header { background: #1b232e !important; border-color: #2b3644 !important; }
+    .placeholder { background: #1b232e !important; border-color: #2b3644 !important; }
   }
-  .caja {
-    background: #fff; border: 1px solid #dde3ea; border-radius: 14px;
-    padding: 34px; max-width: 480px; text-align: center;
-    box-shadow: 0 10px 30px -18px rgba(0,0,0,.3);
+  header {
+    background: #fff; border-bottom: 1px solid #dde3ea;
+    padding: 32px 20px 24px;
+    text-align: center;
   }
-  h1 { font-size: 22px; margin: 0 0 10px; }
-  p { margin: 0 0 14px; line-height: 1.55; }
-  p:last-child { margin-bottom: 0; }
-  code {
-    background: #eef2f6; padding: 2px 6px; border-radius: 4px;
-    font-family: ui-monospace, "Consolas", monospace; font-size: .9em;
+  h1 {
+    font-size: clamp(22px, 6vw, 30px);
+    margin: 0 0 10px;
   }
-  .chica { font-size: 14px; opacity: .75; }
+  header p {
+    margin: 0 auto; max-width: 480px;
+    line-height: 1.55; font-size: 16px;
+    opacity: .85;
+  }
+  main {
+    max-width: 600px; margin: 0 auto;
+    padding: 24px 20px 48px;
+  }
+  .placeholder {
+    background: #fff; border: 1px dashed #c3ccd6; border-radius: 14px;
+    padding: 40px 24px; text-align: center;
+    color: inherit; opacity: .75;
+  }
+  .placeholder p { margin: 0; line-height: 1.55; }
+  .seccion { margin-bottom: 28px; }
+  .seccion h2 {
+    font-size: 18px; margin: 0 0 12px;
+  }
+  .seccion ul {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    .seccion li { background: #1b232e !important; border-color: #2b3644 !important; }
+  }
+  .seccion li {
+    background: #fff; border: 1px solid #dde3ea; border-radius: 12px;
+    padding: 14px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+  }
+  .seccion .etiqueta { line-height: 1.4; }
+  .seccion .votos {
+    font-size: 13px; opacity: .7; white-space: nowrap;
+  }
+  .seccion .acciones {
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  }
+  .seccion button {
+    border: 1px solid #c3ccd6; background: #eef2f6; color: inherit;
+    border-radius: 8px; padding: 8px 14px;
+    font-size: 14px; cursor: pointer;
+  }
+  .seccion button:active { transform: translateY(1px); }
+  .seccion .vacio { opacity: .7; font-size: 14px; }
 </style>
 </head>
 <body>
-  <div class="caja">
-    <h1>Todavía no hay nada aquí</h1>
-    <p>Y eso es exactamente lo que tiene que decir hoy.</p>
-    <p>Si estás leyendo esto en tu propia liga, quiere decir que
-       <strong>tu repositorio, tu publicación y tu página ya funcionan</strong>.
-       Es todo lo que necesitabas antes de la sesión.</p>
-    <p class="chica">El martes le vas a pedir a Claude que reemplace esta página
-       por la tuya. Este archivo se llama <code>index.html</code> y es el único
-       que hay que cambiar.</p>
-  </div>
+  <header>
+    <h1>Buzón de sugerencias — Posada de fin de año</h1>
+    <p>Ayúdanos a hacer mejor la posada de este año: cuéntanos qué te
+       gustaría que tuviera, qué cambiarías o cualquier idea que se te ocurra.</p>
+  </header>
+  <main>
+    <section class="seccion">
+      <h2>Propuestas de fecha para la cena</h2>
+      <ul id="lista-fechas"></ul>
+    </section>
+    <section class="seccion">
+      <h2>Propuestas de lugares para ir a cenar</h2>
+      <ul id="lista-lugares"></ul>
+    </section>
+    <div class="placeholder">
+      <p>Aquí va a ir el formulario para dejar tu sugerencia.</p>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://mguzayplgdoxubfatwsy.supabase.co",
+      "sb_publishable_04ZLX99calb5dgi5Ekkxag_WE9K5kp9"
+    );
+
+    function crearFila(texto, votos, onVotar) {
+      const li = document.createElement("li");
+
+      const etiqueta = document.createElement("span");
+      etiqueta.className = "etiqueta";
+      etiqueta.textContent = texto;
+
+      const acciones = document.createElement("div");
+      acciones.className = "acciones";
+
+      const contador = document.createElement("span");
+      contador.className = "votos";
+      contador.textContent = votos === 1 ? "1 voto" : votos + " votos";
+
+      const boton = document.createElement("button");
+      boton.type = "button";
+      boton.textContent = "Votar";
+      boton.addEventListener("click", async () => {
+        boton.disabled = true;
+        try {
+          await onVotar();
+          votos += 1;
+          contador.textContent = votos === 1 ? "1 voto" : votos + " votos";
+        } finally {
+          boton.disabled = false;
+        }
+      });
+
+      acciones.appendChild(contador);
+      acciones.appendChild(boton);
+      li.appendChild(etiqueta);
+      li.appendChild(acciones);
+      return li;
+    }
+
+    async function cargarFechas() {
+      const lista = document.getElementById("lista-fechas");
+      const { data, error } = await supabase
+        .from("fechas_propuestas")
+        .select("id, etiqueta, votos")
+        .order("votos", { ascending: false });
+
+      if (error || !data || data.length === 0) {
+        const li = document.createElement("li");
+        li.className = "vacio";
+        li.textContent = "Todavía no hay propuestas de fecha.";
+        lista.appendChild(li);
+        return;
+      }
+
+      data.forEach((fila) => {
+        lista.appendChild(
+          crearFila(fila.etiqueta, fila.votos, async () => {
+            await supabase.rpc("votar_fecha", { fecha_id: fila.id });
+          })
+        );
+      });
+    }
+
+    async function cargarLugares() {
+      const lista = document.getElementById("lista-lugares");
+      const { data, error } = await supabase
+        .from("lugares_propuestas")
+        .select("id, nombre, votos")
+        .order("votos", { ascending: false });
+
+      if (error || !data || data.length === 0) {
+        const li = document.createElement("li");
+        li.className = "vacio";
+        li.textContent = "Todavía no hay propuestas de lugares.";
+        lista.appendChild(li);
+        return;
+      }
+
+      data.forEach((fila) => {
+        lista.appendChild(
+          crearFila(fila.nombre, fila.votos, async () => {
+            await supabase.rpc("votar_lugar", { lugar_id: fila.id });
+          })
+        );
+      });
+    }
+
+    cargarFechas();
+    cargarLugares();
+  </script>
 </body>
 </html>
