@@ -71,6 +71,33 @@
   }
   .seccion button:active { transform: translateY(1px); }
   .seccion .vacio { opacity: .7; font-size: 14px; }
+  .tabla-fechas {
+    background: #fff; border: 1px solid #dde3ea; border-radius: 14px;
+    padding: 24px; overflow-x: auto;
+  }
+  @media (prefers-color-scheme: dark) {
+    .tabla-fechas { background: #1b232e !important; border-color: #2b3644 !important; }
+    .tabla-fechas table th { border-color: #2b3644 !important; }
+    .tabla-fechas table td { border-color: #2b3644 !important; }
+  }
+  .tabla-fechas h2 { font-size: 18px; margin: 0 0 12px; }
+  .tabla-fechas table {
+    width: 100%; border-collapse: collapse; font-size: 14px;
+  }
+  .tabla-fechas th, .tabla-fechas td {
+    text-align: left; padding: 10px 8px;
+    border-bottom: 1px solid #dde3ea;
+  }
+  .tabla-fechas th:last-child, .tabla-fechas td:last-child { text-align: right; }
+  .tabla-fechas form {
+    display: flex; gap: 8px; margin-top: 16px;
+  }
+  .tabla-fechas input[type="text"] {
+    flex: 1; min-width: 0;
+    padding: 8px 10px; border: 1px solid #c3ccd6; border-radius: 8px;
+    font-size: 14px; background: inherit; color: inherit;
+  }
+  .tabla-fechas .vacio { opacity: .7; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -88,8 +115,22 @@
       <h2>Propuestas de lugares para ir a cenar</h2>
       <ul id="lista-lugares"></ul>
     </section>
-    <div class="placeholder">
-      <p>Aquí va a ir el formulario para dejar tu sugerencia.</p>
+    <div class="tabla-fechas">
+      <h2>Propón y vota una fecha</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha propuesta</th>
+            <th>Votos</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tabla-fechas-cuerpo"></tbody>
+      </table>
+      <form id="form-fecha">
+        <input type="text" id="input-fecha" placeholder="Ej. Viernes 12 de diciembre" maxlength="200" required>
+        <button type="submit">Proponer</button>
+      </form>
     </div>
   </main>
 
@@ -183,8 +224,83 @@
       });
     }
 
+    function crearFilaTabla(id, texto, votos) {
+      const tr = document.createElement("tr");
+
+      const tdEtiqueta = document.createElement("td");
+      tdEtiqueta.textContent = texto;
+
+      const tdVotos = document.createElement("td");
+      tdVotos.textContent = votos;
+
+      const tdBoton = document.createElement("td");
+      const boton = document.createElement("button");
+      boton.type = "button";
+      boton.textContent = "Votar";
+      boton.addEventListener("click", async () => {
+        boton.disabled = true;
+        try {
+          await supabase.rpc("votar_fecha", { fecha_id: id });
+          votos += 1;
+          tdVotos.textContent = votos;
+        } finally {
+          boton.disabled = false;
+        }
+      });
+      tdBoton.appendChild(boton);
+
+      tr.appendChild(tdEtiqueta);
+      tr.appendChild(tdVotos);
+      tr.appendChild(tdBoton);
+      return tr;
+    }
+
+    async function cargarTablaFechas() {
+      const cuerpo = document.getElementById("tabla-fechas-cuerpo");
+      cuerpo.innerHTML = "";
+      const { data, error } = await supabase
+        .from("fechas_propuestas")
+        .select("id, etiqueta, votos")
+        .order("votos", { ascending: false });
+
+      if (error || !data || data.length === 0) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 3;
+        td.className = "vacio";
+        td.textContent = "Todavía no hay fechas propuestas.";
+        tr.appendChild(td);
+        cuerpo.appendChild(tr);
+        return;
+      }
+
+      data.forEach((fila) => {
+        cuerpo.appendChild(crearFilaTabla(fila.id, fila.etiqueta, fila.votos));
+      });
+    }
+
+    document.getElementById("form-fecha").addEventListener("submit", async (evento) => {
+      evento.preventDefault();
+      const input = document.getElementById("input-fecha");
+      const etiqueta = input.value.trim();
+      if (!etiqueta) return;
+
+      const boton = evento.target.querySelector("button");
+      boton.disabled = true;
+      try {
+        const { error } = await supabase.rpc("agregar_fecha", { etiqueta_nueva: etiqueta });
+        if (!error) {
+          input.value = "";
+          await cargarTablaFechas();
+        }
+      } finally {
+        boton.disabled = false;
+      }
+    });
+
     cargarFechas();
     cargarLugares();
+    cargarTablaFechas();
   </script>
 </body>
 </html>
